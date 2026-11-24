@@ -111,6 +111,30 @@ button.ref{font:600 12.5px/1.5 var(--mono);color:var(--ink);background:var(--ink
 .cbar span{display:block;height:100%;background:var(--red);border-radius:5px}
 .plist .tt{font-weight:700}
 .plist .dd{font-size:14.5px;color:var(--fg);font-weight:400;margin-top:2px}
+.ledger{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.lhead{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:0;background:transparent;cursor:pointer;text-align:left}
+.ltitle{font-weight:700;font-size:14px}
+.lcount{font:600 12.5px var(--mono);color:#fff;background:var(--red);border-radius:10px;padding:1px 8px}
+:root[data-theme="dark"] .lcount{color:#14181c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lcount{color:#14181c}}
+.ltog{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.lempty{font-size:13px;color:var(--muted);padding:0 14px 12px}
+.lent{list-style:none;margin:0;padding:0 14px 12px;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:10px}
+.lh{display:flex;gap:8px;align-items:baseline}
+.ld{font:600 12.5px var(--mono);color:var(--red);flex:none;min-width:44px}
+.lt{font-weight:700;font-size:14px;min-width:0}
+.lup{list-style:none;margin:4px 0 0;padding:0 0 0 52px;display:flex;flex-direction:column;gap:3px}
+.lup li{display:flex;gap:6px;align-items:baseline;font-size:13px;line-height:1.45}
+.ud{font:500 11.5px var(--mono);color:var(--muted);flex:none;min-width:40px}
+.uk{flex:none;font-size:11px;font-weight:700;border-radius:3px;padding:0 5px}
+.uk.bad{background:var(--red-soft);color:var(--red)}
+.uk.say{background:var(--ink-soft);color:var(--ink)}
+.uk.fix{background:var(--ok-soft);color:var(--ok)}
+.uk.res{background:var(--line);color:var(--fg)}
+.ut{min-width:0}
+.lent .new{animation:flash 1.6s ease}
+@keyframes flash{0%{background:var(--mark)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.lent .new{animation:none}}
 /* footer nav */
 footer{position:sticky;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px))}
 .nav{display:flex;gap:10px;align-items:center}
@@ -229,6 +253,46 @@ var SUM=[
   {t:"올해 보류, 동의는 내년에 처음부터",d:"9.1. 안건을 근거로 1,963세대 동의투표가 진행됐지만, 11.10.에 올해 사업을 보류하고 내년에 동의 절차부터 다시 하기로 했습니다. 9월에 받은 동의(행위허가 1,323세대, 수시조정 985세대)는 쓰이지 않습니다.",s:["n55b"]}
  ]}
 ];
+var LEDGER=[
+ {at:1,d:"9.1.",t:"감리업체 선정, 찬성 7명 (기준 8명)",up:[
+  {at:3,d:"9.3.",k:"bad",t:"결과 공고에 '선정하기로 의결함'"},
+  {at:8,d:"10.12.",k:"say",t:"관리사무소 '정족수 산정 오류' (9.1. 결과 공고는 정정 안 됨)"},
+  {at:9,d:"10.20.",k:"bad",t:"재심의 대신 '의결 주문 내용' 정정하기로"},
+  {at:10,d:"11.4.",k:"say",t:"해명이 바뀜: '회의록 작성 시 가결로 잘못 기재'"},
+  {at:11,d:"11.10.",k:"fix",t:"부결로 정리 · 70일 걸림"}]},
+ {at:4,d:"9.15.",t:"방문투표, 의결 공고에 없음",up:[
+  {at:4,d:"9.15.",k:"bad",t:"9.1. 결과 공고·9.15. 회의 결과 모두 방문투표 없음"},
+  {at:5,d:"9.16.",k:"bad",t:"'기 공지한 대로' 방문투표 진행 공고"}]},
+ {at:5,d:"9.15.",t:"방문투표 집계, 공고 전날부터",up:[
+  {at:5,d:"9.18.",k:"bad",t:"공고 일시는 9.16.~17., 집계는 9.15.부터"},
+  {at:6,d:"9.18.",k:"bad",t:"여유 14·3세대인데 9.15. 표 수는 비공개"}]},
+ {at:7,d:"10.6.",t:"같은 업체 재선정, 또 찬성 7명",up:[
+  {at:7,d:"10.7.",k:"bad",t:"결과 공고에 '재선정하기로 의결함'"},
+  {at:8,d:"10.12.",k:"fix",t:"부결로 정정 · 6일 걸림"}]},
+ {at:12,d:"11.10.",t:"결과: 올해 보류, 내년에 처음부터",up:[
+  {at:12,d:"11.10.",k:"res",t:"9월 동의(1,323·985세대)는 쓰이지 않음"}]}
+];
+var KIND={bad:"잘못",say:"해명",fix:"정정",res:"결과"};
+var ledgerOpen=true;
+function seen(at){var i=state.i;if(at<i)return true;if(at>i)return false;var c=CARDS[i];return !c.quiz||state.ans[i]!=null;}
+function ledger(){
+  var box=el("section","ledger");var list=LEDGER.filter(function(e){return seen(e.at);});
+  var n=0;list.forEach(function(e){e.up.forEach(function(u){if(seen(u.at)&&u.k==="bad")n++;});});
+  var hd=el("button","lhead");hd.setAttribute("aria-expanded",ledgerOpen?"true":"false");
+  hd.appendChild(el("span","ltitle","기록판"));hd.appendChild(el("span","lcount","잘못 "+n+"건"));hd.appendChild(el("span","ltog",ledgerOpen?"접기":"펼치기"));
+  hd.onclick=function(){ledgerOpen=!ledgerOpen;var o=document.querySelector(".ledger");if(o)o.replaceWith(ledger());};
+  box.appendChild(hd);
+  if(!list.length){if(ledgerOpen)box.appendChild(el("p","lempty","퀴즈를 풀면 공고로 확인된 잘못과 해명이 날짜순으로 여기에 쌓입니다."));return box;}
+  if(!ledgerOpen)return box;
+  var ol=el("ol","lent");
+  list.forEach(function(e){var li=el("li",e.at===state.i?"new":"");
+    var h=el("div","lh");h.appendChild(el("span","ld",e.d));h.appendChild(el("span","lt",e.t));li.appendChild(h);
+    var ul=el("ul","lup");
+    e.up.forEach(function(u){if(!seen(u.at))return;var r=el("li",u.at===state.i?"new":"");
+      r.appendChild(el("span","ud",u.d));r.appendChild(el("span","uk "+u.k,KIND[u.k]));r.appendChild(el("span","ut",u.t));ul.appendChild(r);});
+    li.appendChild(ul);ol.appendChild(li);});
+  box.appendChild(ol);return box;
+}
 var QUIZ=CARDS.filter(function(c){return c.quiz;});
 var state={i:0,ans:{}};
 var $=function(id){return document.getElementById(id);};
@@ -286,6 +350,7 @@ function render(dir){
       row.appendChild(el("span","note",r[3]));cmp.appendChild(row);});
     cmp.appendChild(el("p",null,"9.1. 안건을 근거로 9월에 1,963세대 동의투표가 이미 진행됐습니다."));
     w.appendChild(cmp);
+    ledgerOpen=true;w.appendChild(ledger());
     w.appendChild(el("p","note","다음 장에서 공고로 확인된 문제점을 한 번에 정리했습니다."));
   } else if(c.type==="summary"){
     w.appendChild(el("span","kick","정리"));
@@ -310,6 +375,7 @@ function render(dir){
     w.appendChild(g);
     w.appendChild(el("p","note","이 퀴즈는 단지 입주민이 게시판 공고를 모아 만든 자료입니다. 입주자대표회의나 관리사무소의 공식 자료가 아닙니다."));
   } else {
+    w.appendChild(ledger());
     var meta=el("div","meta");meta.appendChild(el("span","date",c.date));
     var qn=c.quiz?QUIZ.indexOf(c)+1:0;
     meta.appendChild(el("span","kick",c.quiz?"퀴즈 "+qn+" / "+QUIZ.length:"이어서"));w.appendChild(meta);
@@ -333,7 +399,7 @@ function render(dir){
   if(!w.parentNode)cardEl.appendChild(w);
   chrome();
 }
-function answer(n){var i=state.i;if(state.ans[i]!=null)return;state.ans[i]=n;showFb(true);chrome();}
+function answer(n){var i=state.i;if(state.ans[i]!=null)return;state.ans[i]=n;var o=document.querySelector(".ledger");if(o)o.replaceWith(ledger());showFb(true);chrome();}
 function showFb(fresh){
   var c=CARDS[state.i],a=state.ans[state.i];
   var bs=cardEl.querySelectorAll(".opt");
