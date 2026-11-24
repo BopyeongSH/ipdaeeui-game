@@ -272,14 +272,14 @@ var LEDGER=[
  {at:12,d:"11.10.",t:"결과: 올해 보류, 내년에 처음부터",up:[
   {at:12,d:"11.10.",k:"res",t:"9월 동의(1,323·985세대)는 쓰이지 않음"}]}
 ];
-var KIND={bad:"잘못",say:"해명",fix:"정정",res:"결과"};
+var KIND={bad:"오류",say:"해명",fix:"정정",res:"결과"};
 var ledgerOpen=true;
 function seen(at){var i=state.i;if(at<i)return true;if(at>i)return false;var c=CARDS[i];return !c.quiz||state.ans[i]!=null;}
 function ledger(){
   var box=el("section","ledger");var list=LEDGER.filter(function(e){return seen(e.at);});
   var n=0;list.forEach(function(e){e.up.forEach(function(u){if(seen(u.at)&&u.k==="bad")n++;});});
   var hd=el("button","lhead");hd.setAttribute("aria-expanded",ledgerOpen?"true":"false");
-  hd.appendChild(el("span","ltitle","기록판"));hd.appendChild(el("span","lcount","잘못 "+n+"건"));hd.appendChild(el("span","ltog",ledgerOpen?"접기":"펼치기"));
+  hd.appendChild(el("span","ltitle","기록판"));hd.appendChild(el("span","lcount","오류 "+n+"건"));hd.appendChild(el("span","ltog",ledgerOpen?"접기":"펼치기"));
   hd.onclick=function(){ledgerOpen=!ledgerOpen;var o=document.querySelector(".ledger");if(o)o.replaceWith(ledger());};
   box.appendChild(hd);
   if(!list.length){if(ledgerOpen)box.appendChild(el("p","lempty","퀴즈를 풀면 공고로 확인된 잘못과 해명이 날짜순으로 여기에 쌓입니다."));return box;}
